@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { MapPin, ArrowLeft, Navigation, RefreshCw, Check, X } from "lucide-react";
+import { MapPin, ArrowLeft, Navigation, RefreshCw, Check, Flame, Snowflake, Minus, Plus } from "lucide-react";
 import FeedMeLogo from "./FeedMeLogo";
 
 interface MapViewProps {
@@ -16,6 +16,14 @@ interface MockLocation {
   distance: string;
   description: string;
   timeAgo: string;
+  temperature: "hot" | "cold";
+  portions: number;
+}
+
+interface MealForm {
+  description: string;
+  temperature: "hot" | "cold";
+  portions: number;
 }
 
 const MapView = ({ role, onBack }: MapViewProps) => {
@@ -24,6 +32,12 @@ const MapView = ({ role, onBack }: MapViewProps) => {
   const [isSharing, setIsSharing] = useState(false);
   const [shareSuccess, setShareSuccess] = useState(false);
   const [nearbyItems, setNearbyItems] = useState<MockLocation[]>([]);
+  const [showMealForm, setShowMealForm] = useState(false);
+  const [mealForm, setMealForm] = useState<MealForm>({
+    description: "",
+    temperature: "hot",
+    portions: 1,
+  });
   
   // Simulate getting location
   useEffect(() => {
@@ -31,12 +45,16 @@ const MapView = ({ role, onBack }: MapViewProps) => {
       setIsLocating(false);
       setHasLocation(true);
       
+      if (role === "give") {
+        setShowMealForm(true);
+      }
+      
       if (role === "need") {
         // Simulate nearby food offers
         setNearbyItems([
-          { id: "1", lat: 0, lng: 0, distance: "150m", description: "Plat de pâtes à la bolognaise", timeAgo: "Il y a 3 min" },
-          { id: "2", lat: 0, lng: 0, distance: "320m", description: "Curry de légumes + riz", timeAgo: "Il y a 8 min" },
-          { id: "3", lat: 0, lng: 0, distance: "500m", description: "Sandwich complet", timeAgo: "Il y a 12 min" },
+          { id: "1", lat: 0, lng: 0, distance: "150m", description: "Plat de pâtes à la bolognaise", timeAgo: "Il y a 3 min", temperature: "hot", portions: 1 },
+          { id: "2", lat: 0, lng: 0, distance: "320m", description: "Curry de légumes + riz", timeAgo: "Il y a 8 min", temperature: "hot", portions: 2 },
+          { id: "3", lat: 0, lng: 0, distance: "500m", description: "Sandwich complet", timeAgo: "Il y a 12 min", temperature: "cold", portions: 1 },
         ]);
       }
     }, 2000);
@@ -45,14 +63,26 @@ const MapView = ({ role, onBack }: MapViewProps) => {
   }, [role]);
   
   const handleShare = () => {
+    if (!mealForm.description.trim()) return;
+    
     setIsSharing(true);
+    setShowMealForm(false);
     setTimeout(() => {
       setIsSharing(false);
       setShareSuccess(true);
     }, 1500);
   };
+
+  const incrementPortions = () => {
+    setMealForm(prev => ({ ...prev, portions: Math.min(prev.portions + 1, 10) }));
+  };
+
+  const decrementPortions = () => {
+    setMealForm(prev => ({ ...prev, portions: Math.max(prev.portions - 1, 1) }));
+  };
   
   const isGiver = role === "give";
+  const canSubmit = mealForm.description.trim().length > 0;
   
   return (
     <motion.div
@@ -121,7 +151,7 @@ const MapView = ({ role, onBack }: MapViewProps) => {
             }}
           >
             <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center shadow-glow-primary cursor-pointer hover:scale-110 transition-transform">
-              <span className="text-lg">🍲</span>
+              <span className="text-lg">{item.temperature === "hot" ? "🍲" : "🥪"}</span>
             </div>
           </motion.div>
         ))}
@@ -152,7 +182,7 @@ const MapView = ({ role, onBack }: MapViewProps) => {
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.5 }}
-        className="bg-background border-t border-border p-6 rounded-t-3xl -mt-6 relative z-10 shadow-elevated"
+        className="bg-background border-t border-border p-6 rounded-t-3xl -mt-6 relative z-10 shadow-elevated max-h-[70vh] overflow-auto"
       >
         {isGiver ? (
           // Giver panel
@@ -172,6 +202,107 @@ const MapView = ({ role, onBack }: MapViewProps) => {
                 </p>
                 <Button variant="soft" onClick={onBack}>
                   Retour à l'accueil
+                </Button>
+              </motion.div>
+            ) : showMealForm ? (
+              // Meal description form
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <h3 className="font-display text-xl font-bold mb-6">Décrivez votre repas</h3>
+                
+                {/* Meal description */}
+                <div className="mb-5">
+                  <label className="block text-sm font-medium mb-2 text-foreground">
+                    Quel repas partagez-vous ?
+                  </label>
+                  <textarea
+                    value={mealForm.description}
+                    onChange={(e) => setMealForm(prev => ({ ...prev, description: e.target.value }))}
+                    placeholder="Ex: Pâtes carbonara, Curry de poulet, Sandwich jambon-beurre..."
+                    className="w-full h-24 px-4 py-3 rounded-xl border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
+                    maxLength={150}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1 text-right">
+                    {mealForm.description.length}/150
+                  </p>
+                </div>
+                
+                {/* Temperature */}
+                <div className="mb-5">
+                  <label className="block text-sm font-medium mb-2 text-foreground">
+                    Température du repas
+                  </label>
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setMealForm(prev => ({ ...prev, temperature: "hot" }))}
+                      className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 transition-all ${
+                        mealForm.temperature === "hot"
+                          ? "border-secondary bg-secondary/10 text-secondary"
+                          : "border-border bg-card text-muted-foreground hover:border-secondary/50"
+                      }`}
+                    >
+                      <Flame className="w-5 h-5" />
+                      <span className="font-medium">Chaud</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setMealForm(prev => ({ ...prev, temperature: "cold" }))}
+                      className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 transition-all ${
+                        mealForm.temperature === "cold"
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border bg-card text-muted-foreground hover:border-primary/50"
+                      }`}
+                    >
+                      <Snowflake className="w-5 h-5" />
+                      <span className="font-medium">Froid</span>
+                    </button>
+                  </div>
+                </div>
+                
+                {/* Portions */}
+                <div className="mb-6">
+                  <label className="block text-sm font-medium mb-2 text-foreground">
+                    Nombre de portions
+                  </label>
+                  <div className="flex items-center justify-center gap-6 py-3 px-4 rounded-xl border border-border bg-card">
+                    <button
+                      type="button"
+                      onClick={decrementPortions}
+                      disabled={mealForm.portions <= 1}
+                      className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-foreground hover:bg-muted/80 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      <Minus className="w-5 h-5" />
+                    </button>
+                    <div className="text-center">
+                      <span className="font-display text-3xl font-bold text-foreground">{mealForm.portions}</span>
+                      <span className="block text-xs text-muted-foreground">
+                        {mealForm.portions === 1 ? "portion" : "portions"}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={incrementPortions}
+                      disabled={mealForm.portions >= 10}
+                      className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-foreground hover:bg-muted/80 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      <Plus className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+                
+                {/* Submit button */}
+                <Button
+                  variant="give"
+                  size="xl"
+                  className="w-full"
+                  onClick={handleShare}
+                  disabled={!canSubmit}
+                >
+                  <span className="text-xl">🤲</span>
+                  Partager ce repas
                 </Button>
               </motion.div>
             ) : (
@@ -227,11 +358,20 @@ const MapView = ({ role, onBack }: MapViewProps) => {
                   className="bg-card rounded-xl p-4 border border-border flex items-center gap-4 cursor-pointer hover:shadow-soft transition-all"
                 >
                   <div className="w-12 h-12 rounded-xl bg-gradient-warm flex items-center justify-center flex-shrink-0">
-                    <span className="text-xl">🍲</span>
+                    <span className="text-xl">{item.temperature === "hot" ? "🍲" : "🥪"}</span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-foreground truncate">{item.description}</p>
-                    <p className="text-sm text-muted-foreground">À {item.distance} • {item.timeAgo}</p>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <span>À {item.distance}</span>
+                      <span>•</span>
+                      <span className="flex items-center gap-1">
+                        {item.temperature === "hot" ? <Flame className="w-3 h-3" /> : <Snowflake className="w-3 h-3" />}
+                        {item.temperature === "hot" ? "Chaud" : "Froid"}
+                      </span>
+                      <span>•</span>
+                      <span>{item.portions} {item.portions === 1 ? "portion" : "portions"}</span>
+                    </div>
                   </div>
                   <Button variant="outline" size="sm">
                     Y aller
