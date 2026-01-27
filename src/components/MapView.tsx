@@ -143,9 +143,7 @@ const MapView = ({ role, onBack }: MapViewProps) => {
 
   return (
     <motion.div
-      initial={isMobile ? false : { opacity: 0 }}
-      animate={isMobile ? false : { opacity: 1 }}
-      exit={isMobile ? false : { opacity: 0 }}
+      {...(isMobile ? {} : { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } })}
       className="fixed inset-0 z-50 bg-background flex flex-col"
     >
       {/* Header */}
@@ -159,7 +157,7 @@ const MapView = ({ role, onBack }: MapViewProps) => {
       
       {/* Map area with iPhone-style map */}
       <div className="flex-1 relative bg-muted overflow-hidden">
-        {center ? (
+        {center && !isLocating ? (
           <MapContainer
             center={center}
             zoom={isMobile ? 14 : 15}
@@ -235,9 +233,7 @@ const MapView = ({ role, onBack }: MapViewProps) => {
       
       {/* Bottom panel */}
       <motion.div
-        initial={isMobile ? false : { y: 100, opacity: 0 }}
-        animate={isMobile ? false : { y: 0, opacity: 1 }}
-        transition={isMobile ? undefined : { delay: 0.5 }}
+        {...(isMobile ? {} : { initial: { y: 100, opacity: 0 }, animate: { y: 0, opacity: 1 }, transition: { delay: 0.5 } })}
         className="bg-background border-t border-border p-6 rounded-t-3xl -mt-6 relative z-10 shadow-elevated max-h-[70vh] overflow-auto"
       >
         {geoError && (
@@ -255,8 +251,7 @@ const MapView = ({ role, onBack }: MapViewProps) => {
           <div>
             {shareSuccess ? (
               <motion.div
-                initial={isMobile ? false : { scale: 0.9, opacity: 0 }}
-                animate={isMobile ? false : { scale: 1, opacity: 1 }}
+                {...(isMobile ? {} : { initial: { scale: 0.9, opacity: 0 }, animate: { scale: 1, opacity: 1 } })}
                 className="text-center"
               >
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
@@ -273,8 +268,7 @@ const MapView = ({ role, onBack }: MapViewProps) => {
             ) : showMealForm ? (
               // Meal description form
               <motion.div
-                initial={isMobile ? false : { opacity: 0, y: 20 }}
-                animate={isMobile ? false : { opacity: 1, y: 0 }}
+                {...(isMobile ? {} : { initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 } })}
               >
                 <h3 className="font-display text-xl font-bold mb-6">Décrivez votre repas</h3>
                 
@@ -418,9 +412,7 @@ const MapView = ({ role, onBack }: MapViewProps) => {
               {nearbyItems.map((item, index) => (
                 <motion.div
                   key={item.id}
-                  initial={isMobile ? false : { x: -20, opacity: 0 }}
-                  animate={isMobile ? false : { x: 0, opacity: 1 }}
-                  transition={isMobile ? undefined : { delay: index * 0.1 }}
+                  {...(isMobile ? {} : { initial: { x: -20, opacity: 0 }, animate: { x: 0, opacity: 1 }, transition: { delay: index * 0.1 } })}
                   className="bg-card rounded-xl p-4 border border-border flex items-center gap-4 cursor-pointer hover:shadow-soft transition-all"
                 >
                   <div className="w-12 h-12 rounded-xl bg-gradient-warm flex items-center justify-center flex-shrink-0">
