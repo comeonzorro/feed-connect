@@ -6,6 +6,9 @@ import FeedMeLogo from "./FeedMeLogo";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { createMeal, fetchNearbyMeals } from "@/services/api";
 import type { Meal } from "@/types/meal";
+import { MapContainer, TileLayer, Marker, CircleMarker } from "react-leaflet";
+import { Icon } from "leaflet";
+import "leaflet/dist/leaflet.css";
 
 interface MapViewProps {
   role: "need" | "give";
@@ -109,6 +112,33 @@ const MapView = ({ role, onBack }: MapViewProps) => {
     window.open(url, "_blank");
   };
 
+  // Custom icons for markers
+  const currentLocationIcon = new Icon({
+    iconUrl: `data:image/svg+xml;base64,${btoa(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="${isGiver ? '#2f7b57' : '#e26b4c'}" stroke="white" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+      </svg>
+    `)}`,
+    iconSize: [24, 24],
+    iconAnchor: [12, 12],
+  });
+
+  const createMealIcon = (temp: "hot" | "cold") => {
+    const emoji = temp === "hot" ? "🍲" : "🥪";
+    return new Icon({
+      iconUrl: `data:image/svg+xml;base64,${btoa(`
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
+          <circle cx="20" cy="20" r="18" fill="#2f7b57" stroke="white" stroke-width="2"/>
+          <text x="20" y="28" font-size="20" text-anchor="middle">${emoji}</text>
+        </svg>
+      `)}`,
+      iconSize: [40, 40],
+      iconAnchor: [20, 20],
+    });
+  };
+
+  const center = coords ? [coords.latitude, coords.longitude] as [number, number] : undefined;
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -125,61 +155,53 @@ const MapView = ({ role, onBack }: MapViewProps) => {
         <div className="w-9" /> {/* Spacer for centering */}
       </header>
       
-      {/* Map area (simple styled background) */}
-      <div className="flex-1 relative bg-gradient-to-br from-muted via-muted/90 to-muted/80 overflow-hidden">
-        {/* Simple grid background */}
-        <div className="absolute inset-0 opacity-40">
-          <div className="h-full w-full" style={{
-            backgroundImage: `
-              linear-gradient(to right, hsl(var(--border)) 1px, transparent 1px),
-              linear-gradient(to bottom, hsl(var(--border)) 1px, transparent 1px)
-            `,
-            backgroundSize: '40px 40px'
-          }} />
-        </div>
-        
-        {/* Simulated streets */}
-        <div className="absolute inset-0">
-          <div className="absolute top-1/3 left-0 right-0 h-8 bg-card/70 shadow-sm" />
-          <div className="absolute top-2/3 left-0 right-0 h-6 bg-card/60 shadow-sm" />
-          <div className="absolute left-1/4 top-0 bottom-0 w-6 bg-card/65 shadow-sm" />
-          <div className="absolute left-2/3 top-0 bottom-0 w-8 bg-card/70 shadow-sm" />
-        </div>
-        
-        {/* Current location marker */}
-        {hasLocation && (
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+      {/* Map area with iPhone-style map */}
+      <div className="flex-1 relative bg-muted overflow-hidden">
+        {center ? (
+          <MapContainer
+            center={center}
+            zoom={15}
+            className="h-full w-full z-0"
+            scrollWheelZoom={false}
+            zoomControl={true}
+            dragging={true}
+            touchZoom={true}
           >
-            <div className="relative">
-              <div className={`w-16 h-16 rounded-full ${isGiver ? 'bg-primary/20' : 'bg-secondary/20'} animate-ping`} />
-              <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full ${isGiver ? 'bg-gradient-nature' : 'bg-gradient-warm'} flex items-center justify-center shadow-elevated`}>
-                <Navigation className="w-5 h-5 text-primary-foreground" />
-              </div>
-            </div>
-          </motion.div>
+            {/* CartoDB Positron - iPhone-style map (gray, clean) */}
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+              url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+              subdomains="abcd"
+              maxZoom={19}
+            />
+            
+            {/* Current location marker */}
+            <CircleMarker
+              center={center}
+              radius={8}
+              pathOptions={{
+                color: isGiver ? "#2f7b57" : "#e26b4c",
+                fillColor: isGiver ? "#2f7b57" : "#e26b4c",
+                fillOpacity: 0.8,
+                weight: 2,
+              }}
+            />
+            
+            {/* Nearby meals markers */}
+            {role === "need" &&
+              nearbyItems.map((item) => (
+                <Marker
+                  key={item.id}
+                  position={[item.latitude, item.longitude]}
+                  icon={createMealIcon(item.temperature)}
+                />
+              ))}
+          </MapContainer>
+        ) : (
+          <div className="h-full w-full bg-muted flex items-center justify-center">
+            <p className="text-muted-foreground">Chargement de la carte...</p>
+          </div>
         )}
-        
-        {/* Nearby items markers (for need role) */}
-        {role === "need" && nearbyItems.map((item, index) => (
-          <motion.div
-            key={item.id}
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.3 + index * 0.15 }}
-            className="absolute"
-            style={{
-              top: `${30 + index * 15}%`,
-              left: `${25 + index * 20}%`,
-            }}
-          >
-            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center shadow-glow-primary cursor-pointer hover:scale-110 transition-transform">
-              <span className="text-lg">{item.temperature === "hot" ? "🍲" : "🥪"}</span>
-            </div>
-          </motion.div>
-        ))}
         
         {/* Loading overlay */}
         {isLocating && (

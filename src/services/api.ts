@@ -14,20 +14,34 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const baseUrl = getBaseUrl();
   const url = `${baseUrl}${path}`;
 
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...(options?.headers ?? {}),
-    },
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 secondes timeout
 
-  if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(text || `API request failed with status ${response.status}`);
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+      headers: {
+        "Content-Type": "application/json",
+        ...(options?.headers ?? {}),
+      },
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const text = await response.text().catch(() => "");
+      throw new Error(text || `API request failed with status ${response.status}`);
+    }
+
+    return (await response.json()) as T;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new Error("La requête a pris trop de temps. Vérifiez votre connexion.");
+    }
+    throw error;
   }
-
-  return (await response.json()) as T;
 }
 
 export async function createMeal(payload: CreateMealPayload): Promise<Meal> {
