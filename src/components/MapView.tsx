@@ -6,8 +6,6 @@ import FeedMeLogo from "./FeedMeLogo";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { createMeal, fetchNearbyMeals } from "@/services/api";
 import type { Meal } from "@/types/meal";
-import { MapContainer, TileLayer, Marker, CircleMarker } from "react-leaflet";
-import type { LatLngExpression } from "leaflet";
 
 interface MapViewProps {
   role: "need" | "give";
@@ -111,10 +109,6 @@ const MapView = ({ role, onBack }: MapViewProps) => {
     window.open(url, "_blank");
   };
 
-  const center: LatLngExpression | undefined = coords
-    ? [coords.latitude, coords.longitude]
-    : undefined;
-
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -131,40 +125,62 @@ const MapView = ({ role, onBack }: MapViewProps) => {
         <div className="w-9" /> {/* Spacer for centering */}
       </header>
       
-      {/* Map area with real tiles */}
+      {/* Map area (simple styled background) */}
       <div className="flex-1 relative bg-muted overflow-hidden">
-        {center && (
-          <MapContainer
-            center={center}
-            zoom={15}
-            className="h-full w-full"
-            scrollWheelZoom={false}
+        {/* Simple grid background */}
+        <div className="absolute inset-0 opacity-20">
+          <div className="h-full w-full" style={{
+            backgroundImage: `
+              linear-gradient(to right, hsl(var(--border)) 1px, transparent 1px),
+              linear-gradient(to bottom, hsl(var(--border)) 1px, transparent 1px)
+            `,
+            backgroundSize: '40px 40px'
+          }} />
+        </div>
+        
+        {/* Simulated streets */}
+        <div className="absolute inset-0">
+          <div className="absolute top-1/3 left-0 right-0 h-8 bg-card/60" />
+          <div className="absolute top-2/3 left-0 right-0 h-6 bg-card/40" />
+          <div className="absolute left-1/4 top-0 bottom-0 w-6 bg-card/50" />
+          <div className="absolute left-2/3 top-0 bottom-0 w-8 bg-card/60" />
+        </div>
+        
+        {/* Current location marker */}
+        {hasLocation && (
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
           >
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            {/* Current location marker */}
-            <CircleMarker
-              center={center}
-              radius={12}
-              pathOptions={{
-                color: isGiver ? "#2f7b57" : "#e26b4c",
-                fillColor: isGiver ? "#2f7b57" : "#e26b4c",
-                fillOpacity: 0.5,
-              }}
-            />
-            {/* Nearby meals markers */}
-            {role === "need" &&
-              nearbyItems.map((item) => (
-                <Marker
-                  key={item.id}
-                  position={[item.latitude, item.longitude]}
-                />
-              ))}
-          </MapContainer>
+            <div className="relative">
+              <div className={`w-16 h-16 rounded-full ${isGiver ? 'bg-primary/20' : 'bg-secondary/20'} animate-ping`} />
+              <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full ${isGiver ? 'bg-gradient-nature' : 'bg-gradient-warm'} flex items-center justify-center shadow-elevated`}>
+                <Navigation className="w-5 h-5 text-primary-foreground" />
+              </div>
+            </div>
+          </motion.div>
         )}
-
+        
+        {/* Nearby items markers (for need role) */}
+        {role === "need" && nearbyItems.map((item, index) => (
+          <motion.div
+            key={item.id}
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.3 + index * 0.15 }}
+            className="absolute"
+            style={{
+              top: `${30 + index * 15}%`,
+              left: `${25 + index * 20}%`,
+            }}
+          >
+            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center shadow-glow-primary cursor-pointer hover:scale-110 transition-transform">
+              <span className="text-lg">{item.temperature === "hot" ? "🍲" : "🥪"}</span>
+            </div>
+          </motion.div>
+        ))}
+        
         {/* Loading overlay */}
         {isLocating && (
           <motion.div
