@@ -8,6 +8,7 @@ import { createMeal, fetchNearbyMeals } from "@/services/api";
 import type { Meal } from "@/types/meal";
 import { MapContainer, TileLayer, Marker, CircleMarker } from "react-leaflet";
 import { Icon } from "leaflet";
+import { useIsMobile } from "@/hooks/use-mobile";
 import "leaflet/dist/leaflet.css";
 
 interface MapViewProps {
@@ -23,6 +24,7 @@ interface MealForm {
 
 const MapView = ({ role, onBack }: MapViewProps) => {
   const { coords, loading: locating, error: geoError, requestLocation } = useGeolocation();
+  const isMobile = useIsMobile();
   const hasLocation = !!coords;
   const isLocating = locating;
   const [isSharing, setIsSharing] = useState(false);
@@ -141,9 +143,9 @@ const MapView = ({ role, onBack }: MapViewProps) => {
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+      initial={isMobile ? false : { opacity: 0 }}
+      animate={isMobile ? false : { opacity: 1 }}
+      exit={isMobile ? false : { opacity: 0 }}
       className="fixed inset-0 z-50 bg-background flex flex-col"
     >
       {/* Header */}
@@ -160,19 +162,26 @@ const MapView = ({ role, onBack }: MapViewProps) => {
         {center ? (
           <MapContainer
             center={center}
-            zoom={15}
+            zoom={isMobile ? 14 : 15}
             className="h-full w-full z-0"
             scrollWheelZoom={false}
-            zoomControl={true}
+            zoomControl={!isMobile}
             dragging={true}
             touchZoom={true}
+            doubleClickZoom={false}
+            boxZoom={false}
+            keyboard={false}
+            preferCanvas={isMobile}
           >
             {/* CartoDB Positron - iPhone-style map (gray, clean) */}
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
               url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
               subdomains="abcd"
-              maxZoom={19}
+              maxZoom={isMobile ? 17 : 19}
+              minZoom={12}
+              updateWhenIdle={isMobile}
+              keepBuffer={isMobile ? 1 : 2}
             />
             
             {/* Current location marker */}
@@ -226,9 +235,9 @@ const MapView = ({ role, onBack }: MapViewProps) => {
       
       {/* Bottom panel */}
       <motion.div
-        initial={{ y: 100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.5 }}
+        initial={isMobile ? false : { y: 100, opacity: 0 }}
+        animate={isMobile ? false : { y: 0, opacity: 1 }}
+        transition={isMobile ? undefined : { delay: 0.5 }}
         className="bg-background border-t border-border p-6 rounded-t-3xl -mt-6 relative z-10 shadow-elevated max-h-[70vh] overflow-auto"
       >
         {geoError && (
@@ -246,8 +255,8 @@ const MapView = ({ role, onBack }: MapViewProps) => {
           <div>
             {shareSuccess ? (
               <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
+                initial={isMobile ? false : { scale: 0.9, opacity: 0 }}
+                animate={isMobile ? false : { scale: 1, opacity: 1 }}
                 className="text-center"
               >
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
@@ -264,8 +273,8 @@ const MapView = ({ role, onBack }: MapViewProps) => {
             ) : showMealForm ? (
               // Meal description form
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={isMobile ? false : { opacity: 0, y: 20 }}
+                animate={isMobile ? false : { opacity: 1, y: 0 }}
               >
                 <h3 className="font-display text-xl font-bold mb-6">Décrivez votre repas</h3>
                 
@@ -409,9 +418,9 @@ const MapView = ({ role, onBack }: MapViewProps) => {
               {nearbyItems.map((item, index) => (
                 <motion.div
                   key={item.id}
-                  initial={{ x: -20, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: index * 0.1 }}
+                  initial={isMobile ? false : { x: -20, opacity: 0 }}
+                  animate={isMobile ? false : { x: 0, opacity: 1 }}
+                  transition={isMobile ? undefined : { delay: index * 0.1 }}
                   className="bg-card rounded-xl p-4 border border-border flex items-center gap-4 cursor-pointer hover:shadow-soft transition-all"
                 >
                   <div className="w-12 h-12 rounded-xl bg-gradient-warm flex items-center justify-center flex-shrink-0">
