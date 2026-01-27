@@ -126,9 +126,9 @@ const MapView = ({ role, onBack }: MapViewProps) => {
       </header>
       
       {/* Map area (simple styled background) */}
-      <div className="flex-1 relative bg-muted overflow-hidden">
+      <div className="flex-1 relative bg-gradient-to-br from-muted via-muted/90 to-muted/80 overflow-hidden">
         {/* Simple grid background */}
-        <div className="absolute inset-0 opacity-20">
+        <div className="absolute inset-0 opacity-40">
           <div className="h-full w-full" style={{
             backgroundImage: `
               linear-gradient(to right, hsl(var(--border)) 1px, transparent 1px),
@@ -140,10 +140,10 @@ const MapView = ({ role, onBack }: MapViewProps) => {
         
         {/* Simulated streets */}
         <div className="absolute inset-0">
-          <div className="absolute top-1/3 left-0 right-0 h-8 bg-card/60" />
-          <div className="absolute top-2/3 left-0 right-0 h-6 bg-card/40" />
-          <div className="absolute left-1/4 top-0 bottom-0 w-6 bg-card/50" />
-          <div className="absolute left-2/3 top-0 bottom-0 w-8 bg-card/60" />
+          <div className="absolute top-1/3 left-0 right-0 h-8 bg-card/70 shadow-sm" />
+          <div className="absolute top-2/3 left-0 right-0 h-6 bg-card/60 shadow-sm" />
+          <div className="absolute left-1/4 top-0 bottom-0 w-6 bg-card/65 shadow-sm" />
+          <div className="absolute left-2/3 top-0 bottom-0 w-8 bg-card/70 shadow-sm" />
         </div>
         
         {/* Current location marker */}
