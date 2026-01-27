@@ -3,21 +3,13 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { MapPin, ArrowLeft, Navigation, RefreshCw, Check, Flame, Snowflake, Minus, Plus } from "lucide-react";
 import FeedMeLogo from "./FeedMeLogo";
+import { useGeolocation } from "@/hooks/useGeolocation";
+import { createMeal, fetchNearbyMeals } from "@/services/api";
+import type { Meal } from "@/types/meal";
 
 interface MapViewProps {
   role: "need" | "give";
   onBack: () => void;
-}
-
-interface MockLocation {
-  id: string;
-  lat: number;
-  lng: number;
-  distance: string;
-  description: string;
-  timeAgo: string;
-  temperature: "hot" | "cold";
-  portions: number;
 }
 
 interface MealForm {
@@ -27,50 +19,77 @@ interface MealForm {
 }
 
 const MapView = ({ role, onBack }: MapViewProps) => {
-  const [isLocating, setIsLocating] = useState(true);
-  const [hasLocation, setHasLocation] = useState(false);
+  const { coords, loading: locating, error: geoError, requestLocation } = useGeolocation();
+  const hasLocation = !!coords;
+  const isLocating = locating;
   const [isSharing, setIsSharing] = useState(false);
   const [shareSuccess, setShareSuccess] = useState(false);
-  const [nearbyItems, setNearbyItems] = useState<MockLocation[]>([]);
+  const [nearbyItems, setNearbyItems] = useState<Meal[]>([]);
   const [showMealForm, setShowMealForm] = useState(false);
   const [mealForm, setMealForm] = useState<MealForm>({
     description: "",
     temperature: "hot",
     portions: 1,
   });
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   
-  // Simulate getting location
+  // Demande de géolocalisation au montage
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLocating(false);
-      setHasLocation(true);
-      
-      if (role === "give") {
-        setShowMealForm(true);
-      }
-      
-      if (role === "need") {
-        // Simulate nearby food offers
-        setNearbyItems([
-          { id: "1", lat: 0, lng: 0, distance: "150m", description: "Plat de pâtes à la bolognaise", timeAgo: "Il y a 3 min", temperature: "hot", portions: 1 },
-          { id: "2", lat: 0, lng: 0, distance: "320m", description: "Curry de légumes + riz", timeAgo: "Il y a 8 min", temperature: "hot", portions: 2 },
-          { id: "3", lat: 0, lng: 0, distance: "500m", description: "Sandwich complet", timeAgo: "Il y a 12 min", temperature: "cold", portions: 1 },
-        ]);
-      }
-    }, 2000);
-    
-    return () => clearTimeout(timer);
-  }, [role]);
+    requestLocation();
+  }, [requestLocation]);
+
+  // Quand on a la position, on affiche le formulaire (give) ou on charge les repas (need)
+  useEffect(() => {
+    if (!coords || isLocating) return;
+
+    setErrorMessage(null);
+
+    if (role === "give") {
+      setShowMealForm(true);
+      return;
+    }
+
+    if (role === "need") {
+      (async () => {
+        try {
+          const meals = await fetchNearbyMeals({
+            latitude: coords.latitude,
+            longitude: coords.longitude,
+            radiusKm: 2,
+          });
+          setNearbyItems(meals);
+        } catch (error) {
+          console.error(error);
+          setErrorMessage("Impossible de récupérer les repas à proximité. Réessayez dans un instant.");
+        }
+      })();
+    }
+  }, [coords, isLocating, role]);
   
   const handleShare = () => {
-    if (!mealForm.description.trim()) return;
-    
+    if (!mealForm.description.trim() || !coords || isSharing) return;
+
+    setErrorMessage(null);
     setIsSharing(true);
     setShowMealForm(false);
-    setTimeout(() => {
-      setIsSharing(false);
-      setShareSuccess(true);
-    }, 1500);
+
+    createMeal({
+      description: mealForm.description.trim(),
+      temperature: mealForm.temperature,
+      portions: mealForm.portions,
+      latitude: coords.latitude,
+      longitude: coords.longitude,
+    })
+      .then(() => {
+        setIsSharing(false);
+        setShareSuccess(true);
+      })
+      .catch((error) => {
+        console.error(error);
+        setIsSharing(false);
+        setShowMealForm(true);
+        setErrorMessage("Impossible de partager le repas. Vérifiez votre connexion et réessayez.");
+      });
   };
 
   const incrementPortions = () => {
@@ -184,6 +203,16 @@ const MapView = ({ role, onBack }: MapViewProps) => {
         transition={{ delay: 0.5 }}
         className="bg-background border-t border-border p-6 rounded-t-3xl -mt-6 relative z-10 shadow-elevated max-h-[70vh] overflow-auto"
       >
+        {geoError && (
+          <p className="mb-4 text-sm text-destructive">
+            {geoError}
+          </p>
+        )}
+        {errorMessage && !geoError && (
+          <p className="mb-4 text-sm text-destructive">
+            {errorMessage}
+          </p>
+        )}
         {isGiver ? (
           // Giver panel
           <div>
@@ -363,7 +392,7 @@ const MapView = ({ role, onBack }: MapViewProps) => {
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-foreground truncate">{item.description}</p>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <span>À {item.distance}</span>
+                      <span>À {item.distanceLabel ?? "proximité"}</span>
                       <span>•</span>
                       <span className="flex items-center gap-1">
                         {item.temperature === "hot" ? <Flame className="w-3 h-3" /> : <Snowflake className="w-3 h-3" />}
