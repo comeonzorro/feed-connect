@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { MapPin, ArrowLeft, RefreshCw, Check, Flame, Snowflake, Minus, Plus } from "lucide-react";
+import { MapPin, ArrowLeft, RefreshCw, Check, Flame, Snowflake, Minus, Plus, X, Navigation, CheckCircle2 } from "lucide-react";
 import FeedMeLogo from "./FeedMeLogo";
 import { useGeolocation } from "@/hooks/useGeolocation";
-import { createMeal, fetchNearbyMeals } from "@/services/api";
+import { createMeal, fetchNearbyMeals, claimMeal } from "@/services/api";
 import type { Meal } from "@/types/meal";
 import { MapContainer, TileLayer, CircleMarker } from "react-leaflet";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -35,6 +35,9 @@ const MapView = ({ role, onBack }: MapViewProps) => {
     portions: 1,
   });
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
+  const [isClaiming, setIsClaiming] = useState(false);
+  const [claimSuccess, setClaimSuccess] = useState(false);
   
   // Demande de géolocalisation au montage
   useEffect(() => {
@@ -110,6 +113,35 @@ const MapView = ({ role, onBack }: MapViewProps) => {
     const destination = `${meal.latitude},${meal.longitude}`;
     const url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}`;
     window.open(url, "_blank");
+  };
+
+  const handleSelectMeal = (meal: Meal) => {
+    setSelectedMeal(meal);
+    setClaimSuccess(false);
+  };
+
+  const handleClaimMeal = async () => {
+    if (!selectedMeal || isClaiming) return;
+    
+    setIsClaiming(true);
+    setErrorMessage(null);
+    
+    try {
+      await claimMeal(selectedMeal.id);
+      setClaimSuccess(true);
+      // Retirer le repas de la liste locale
+      setNearbyItems(prev => prev.filter(m => m.id !== selectedMeal.id));
+    } catch (error) {
+      console.error(error);
+      setErrorMessage("Impossible de confirmer la récupération. Le repas a peut-être déjà été pris.");
+    } finally {
+      setIsClaiming(false);
+    }
+  };
+
+  const handleCloseMealDetail = () => {
+    setSelectedMeal(null);
+    setClaimSuccess(false);
   };
 
   const center = coords ? [coords.latitude, coords.longitude] as [number, number] : undefined;
@@ -348,45 +380,135 @@ const MapView = ({ role, onBack }: MapViewProps) => {
           </div>
         ) : (
           <div>
-            <h3 className="font-display text-lg font-bold mb-4">
-              {nearbyItems.length > 0 ? `${nearbyItems.length} repas disponibles` : "Recherche de repas..."}
-            </h3>
-            
-            <div className="space-y-3 max-h-40 overflow-auto">
-              {nearbyItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="bg-card rounded-xl p-4 border border-border flex items-center gap-4"
-                >
-                  <div className="w-10 h-10 rounded-xl bg-gradient-warm flex items-center justify-center flex-shrink-0">
-                    <span className="text-lg">{item.temperature === "hot" ? "🍲" : "🥪"}</span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-foreground truncate text-sm">{item.description}</p>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <span>À {item.distanceLabel ?? "proximité"}</span>
-                      <span>•</span>
-                      <span className="flex items-center gap-1">
-                        {item.temperature === "hot" ? <Flame className="w-3 h-3" /> : <Snowflake className="w-3 h-3" />}
-                        {item.temperature === "hot" ? "Chaud" : "Froid"}
-                      </span>
-                    </div>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleNavigateToMeal(item)}
+            {/* Vue détail d'un repas sélectionné */}
+            {selectedMeal ? (
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-display text-lg font-bold">Détail du repas</h3>
+                  <button 
+                    onClick={handleCloseMealDetail}
+                    className="p-2 rounded-full hover:bg-muted transition-colors"
                   >
-                    Y aller
-                  </Button>
+                    <X className="w-5 h-5" />
+                  </button>
                 </div>
-              ))}
-            </div>
-            
-            {nearbyItems.length === 0 && hasLocation && !isLocating && (
-              <p className="text-center text-muted-foreground py-6">
-                Aucun repas disponible pour le moment.
-              </p>
+                
+                {claimSuccess ? (
+                  <div className="text-center py-4">
+                    <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                      <CheckCircle2 className="w-8 h-8 text-primary" />
+                    </div>
+                    <h4 className="font-display text-xl font-bold mb-2">Repas récupéré !</h4>
+                    <p className="text-muted-foreground mb-4">
+                      Merci d'avoir utilisé FeedMe. Bon appétit !
+                    </p>
+                    <Button variant="soft" onClick={handleCloseMealDetail}>
+                      Voir d'autres repas
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="bg-card rounded-xl p-4 border border-border mb-4">
+                      <div className="flex items-start gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-warm flex items-center justify-center flex-shrink-0">
+                          <span className="text-2xl">{selectedMeal.temperature === "hot" ? "🍲" : "🥪"}</span>
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-semibold text-foreground mb-1">{selectedMeal.description}</p>
+                          <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                            <span>À {selectedMeal.distanceLabel ?? "proximité"}</span>
+                            <span>•</span>
+                            <span className="flex items-center gap-1">
+                              {selectedMeal.temperature === "hot" ? <Flame className="w-3 h-3" /> : <Snowflake className="w-3 h-3" />}
+                              {selectedMeal.temperature === "hot" ? "Chaud" : "Froid"}
+                            </span>
+                            <span>•</span>
+                            <span>{selectedMeal.portions} {selectedMeal.portions === 1 ? "portion" : "portions"}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {errorMessage && (
+                      <p className="mb-4 text-sm text-destructive">{errorMessage}</p>
+                    )}
+                    
+                    <div className="space-y-3">
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        className="w-full"
+                        onClick={() => handleNavigateToMeal(selectedMeal)}
+                      >
+                        <Navigation className="w-5 h-5 mr-2" />
+                        Itinéraire Google Maps
+                      </Button>
+                      
+                      <Button
+                        variant="give"
+                        size="lg"
+                        className="w-full"
+                        onClick={handleClaimMeal}
+                        disabled={isClaiming}
+                      >
+                        {isClaiming ? (
+                          <>
+                            <RefreshCw className="w-5 h-5 mr-2 animate-spin" />
+                            Confirmation...
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle2 className="w-5 h-5 mr-2" />
+                            J'ai récupéré ce repas
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                    
+                    <p className="text-xs text-muted-foreground text-center mt-4">
+                      Confirmez uniquement après avoir récupéré le repas
+                    </p>
+                  </>
+                )}
+              </div>
+            ) : (
+              <>
+                <h3 className="font-display text-lg font-bold mb-4">
+                  {nearbyItems.length > 0 ? `${nearbyItems.length} repas disponibles` : "Recherche de repas..."}
+                </h3>
+                
+                <div className="space-y-3 max-h-40 overflow-auto">
+                  {nearbyItems.map((item) => (
+                    <div
+                      key={item.id}
+                      className="bg-card rounded-xl p-4 border border-border flex items-center gap-4 cursor-pointer hover:border-primary/50 transition-colors"
+                      onClick={() => handleSelectMeal(item)}
+                    >
+                      <div className="w-10 h-10 rounded-xl bg-gradient-warm flex items-center justify-center flex-shrink-0">
+                        <span className="text-lg">{item.temperature === "hot" ? "🍲" : "🥪"}</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-foreground truncate text-sm">{item.description}</p>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <span>À {item.distanceLabel ?? "proximité"}</span>
+                          <span>•</span>
+                          <span className="flex items-center gap-1">
+                            {item.temperature === "hot" ? <Flame className="w-3 h-3" /> : <Snowflake className="w-3 h-3" />}
+                            {item.temperature === "hot" ? "Chaud" : "Froid"}
+                          </span>
+                        </div>
+                      </div>
+                      <ArrowLeft className="w-5 h-5 text-muted-foreground rotate-180" />
+                    </div>
+                  ))}
+                </div>
+                
+                {nearbyItems.length === 0 && hasLocation && !isLocating && (
+                  <p className="text-center text-muted-foreground py-6">
+                    Aucun repas disponible pour le moment.
+                  </p>
+                )}
+              </>
             )}
           </div>
         )}

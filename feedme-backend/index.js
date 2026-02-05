@@ -80,6 +80,26 @@ app.post("/api/meals", (req, res) => {
   res.status(201).json(meal);
 });
 
+// Marquer un repas comme récupéré (le supprime de la liste)
+app.delete("/api/meals/:id", (req, res) => {
+  const { id } = req.params;
+  
+  const index = meals.findIndex((meal) => meal.id === id);
+  
+  if (index === -1) {
+    return res.status(404).json({
+      error: "Repas non trouvé ou déjà récupéré.",
+    });
+  }
+  
+  meals.splice(index, 1);
+  
+  res.json({
+    success: true,
+    message: "Repas marqué comme récupéré. Merci !",
+  });
+});
+
 app.get("/api/meals/nearby", (req, res) => {
   const latitude = Number(req.query.latitude);
   const longitude = Number(req.query.longitude);

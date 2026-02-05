@@ -66,3 +66,9 @@ export async function fetchNearbyMeals(query: NearbyMealsQuery): Promise<Meal[]>
   return request<Meal[]>(`/api/meals/nearby?${params.toString()}`);
 }
 
+export async function claimMeal(mealId: string): Promise<{ success: boolean; message: string }> {
+  return request<{ success: boolean; message: string }>(`/api/meals/${mealId}`, {
+    method: "DELETE",
+  });
+}
+
