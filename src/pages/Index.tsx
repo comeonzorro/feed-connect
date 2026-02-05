@@ -1,6 +1,7 @@
 import { useState, lazy, Suspense } from "react";
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
+import StatsCounter from "@/components/StatsCounter";
 import StorySection from "@/components/StorySection";
 import HowItWorksSection from "@/components/HowItWorksSection";
 import FeaturesSection from "@/components/FeaturesSection";
@@ -61,6 +62,7 @@ const Index = () => {
       <Header onStartClick={handleStartClick} />
       <main>
         <HeroSection onStartClick={handleStartClick} />
+        <StatsCounter />
         <StorySection />
         <HowItWorksSection />
         <FeaturesSection />
