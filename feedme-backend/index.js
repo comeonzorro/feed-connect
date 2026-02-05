@@ -14,6 +14,10 @@ app.use(
 // Stockage en mémoire pour le MVP (disparaît à chaque redémarrage)
 const meals = [];
 
+// Logs anonymes des repas partagés (persiste tant que le serveur tourne)
+// Ne contient AUCUNE donnée personnelle : pas de localisation, pas de description
+const anonymousLogs = [];
+
 function haversineDistanceKm(lat1, lon1, lat2, lon2) {
   const toRad = (v) => (v * Math.PI) / 180;
   const R = 6371; // rayon de la Terre en km
@@ -77,6 +81,14 @@ app.post("/api/meals", (req, res) => {
 
   meals.push(meal);
 
+  // Log anonyme (sans localisation ni description)
+  anonymousLogs.push({
+    timestamp: meal.createdAt,
+    temperature: meal.temperature,
+    portions: meal.portions,
+    claimed: false,
+  });
+
   res.status(201).json(meal);
 });
 
@@ -92,11 +104,52 @@ app.delete("/api/meals/:id", (req, res) => {
     });
   }
   
+  const meal = meals[index];
   meals.splice(index, 1);
+  
+  // Marquer comme récupéré dans les logs anonymes
+  const logEntry = anonymousLogs.find(
+    (log) => log.timestamp === meal.createdAt && !log.claimed
+  );
+  if (logEntry) {
+    logEntry.claimed = true;
+    logEntry.claimedAt = new Date().toISOString();
+  }
   
   res.json({
     success: true,
     message: "Repas marqué comme récupéré. Merci !",
+  });
+});
+
+// Statistiques anonymes
+app.get("/api/stats", (req, res) => {
+  const now = new Date();
+  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfWeek = new Date(startOfDay);
+  startOfWeek.setDate(startOfDay.getDate() - startOfDay.getDay() + 1); // Lundi
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startOfYear = new Date(now.getFullYear(), 0, 1);
+
+  const filterByDate = (startDate) => {
+    return anonymousLogs.filter((log) => new Date(log.timestamp) >= startDate);
+  };
+
+  const computeStats = (logs) => {
+    const shared = logs.length;
+    const claimed = logs.filter((l) => l.claimed).length;
+    const portions = logs.reduce((sum, l) => sum + l.portions, 0);
+    const hot = logs.filter((l) => l.temperature === "hot").length;
+    const cold = logs.filter((l) => l.temperature === "cold").length;
+    return { shared, claimed, portions, hot, cold };
+  };
+
+  res.json({
+    today: computeStats(filterByDate(startOfDay)),
+    week: computeStats(filterByDate(startOfWeek)),
+    month: computeStats(filterByDate(startOfMonth)),
+    year: computeStats(filterByDate(startOfYear)),
+    total: computeStats(anonymousLogs),
   });
 });
 
