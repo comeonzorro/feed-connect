@@ -1,13 +1,11 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { MapPin, ArrowLeft, Navigation, RefreshCw, Check, Flame, Snowflake, Minus, Plus } from "lucide-react";
+import { MapPin, ArrowLeft, RefreshCw, Check, Flame, Snowflake, Minus, Plus } from "lucide-react";
 import FeedMeLogo from "./FeedMeLogo";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { createMeal, fetchNearbyMeals } from "@/services/api";
 import type { Meal } from "@/types/meal";
-import { MapContainer, TileLayer, Marker, CircleMarker } from "react-leaflet";
-import { Icon } from "leaflet";
+import { MapContainer, TileLayer, CircleMarker } from "react-leaflet";
 import { useIsMobile } from "@/hooks/use-mobile";
 import "leaflet/dist/leaflet.css";
 
@@ -114,48 +112,20 @@ const MapView = ({ role, onBack }: MapViewProps) => {
     window.open(url, "_blank");
   };
 
-  // Custom icons for markers
-  const currentLocationIcon = new Icon({
-    iconUrl: `data:image/svg+xml;base64,${btoa(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="${isGiver ? '#2f7b57' : '#e26b4c'}" stroke="white" stroke-width="2">
-        <circle cx="12" cy="12" r="10"/>
-      </svg>
-    `)}`,
-    iconSize: [24, 24],
-    iconAnchor: [12, 12],
-  });
-
-  const createMealIcon = (temp: "hot" | "cold") => {
-    const emoji = temp === "hot" ? "🍲" : "🥪";
-    return new Icon({
-      iconUrl: `data:image/svg+xml;base64,${btoa(`
-        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
-          <circle cx="20" cy="20" r="18" fill="#2f7b57" stroke="white" stroke-width="2"/>
-          <text x="20" y="28" font-size="20" text-anchor="middle">${emoji}</text>
-        </svg>
-      `)}`,
-      iconSize: [40, 40],
-      iconAnchor: [20, 20],
-    });
-  };
-
   const center = coords ? [coords.latitude, coords.longitude] as [number, number] : undefined;
 
   return (
-    <motion.div
-      {...(isMobile ? {} : { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } })}
-      className="fixed inset-0 z-50 bg-background flex flex-col"
-    >
+    <div className="fixed inset-0 z-50 bg-background flex flex-col">
       {/* Header */}
-      <header className="flex items-center justify-between p-4 border-b border-border bg-background/80 backdrop-blur-lg">
+      <header className="flex items-center justify-between p-4 border-b border-border bg-background">
         <button onClick={onBack} className="p-2 rounded-full hover:bg-muted transition-colors">
           <ArrowLeft className="w-5 h-5" />
         </button>
         <FeedMeLogo size="sm" />
-        <div className="w-9" /> {/* Spacer for centering */}
+        <div className="w-9" />
       </header>
       
-      {/* Map area with iPhone-style map */}
+      {/* Map area */}
       <div className="flex-1 relative bg-muted overflow-hidden">
         {center && !isLocating ? (
           <MapContainer
@@ -169,17 +139,16 @@ const MapView = ({ role, onBack }: MapViewProps) => {
             doubleClickZoom={false}
             boxZoom={false}
             keyboard={false}
-            preferCanvas={isMobile}
+            preferCanvas={true}
           >
-            {/* CartoDB Positron - iPhone-style map (gray, clean) */}
             <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+              attribution='&copy; OpenStreetMap &copy; CARTO'
               url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
               subdomains="abcd"
-              maxZoom={isMobile ? 17 : 19}
+              maxZoom={17}
               minZoom={12}
-              updateWhenIdle={isMobile}
-              keepBuffer={isMobile ? 1 : 2}
+              updateWhenIdle={true}
+              keepBuffer={1}
             />
             
             {/* Current location marker */}
@@ -194,13 +163,19 @@ const MapView = ({ role, onBack }: MapViewProps) => {
               }}
             />
             
-            {/* Nearby meals markers */}
+            {/* Nearby meals markers - simple circles for performance */}
             {role === "need" &&
               nearbyItems.map((item) => (
-                <Marker
+                <CircleMarker
                   key={item.id}
-                  position={[item.latitude, item.longitude]}
-                  icon={createMealIcon(item.temperature)}
+                  center={[item.latitude, item.longitude]}
+                  radius={12}
+                  pathOptions={{
+                    color: "#2f7b57",
+                    fillColor: "#2f7b57",
+                    fillOpacity: 0.9,
+                    weight: 2,
+                  }}
                 />
               ))}
           </MapContainer>
@@ -212,67 +187,44 @@ const MapView = ({ role, onBack }: MapViewProps) => {
         
         {/* Loading overlay */}
         {isLocating && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center"
-          >
+          <div className="absolute inset-0 bg-background/90 flex items-center justify-center">
             <div className="text-center">
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                className="w-12 h-12 rounded-full border-4 border-primary border-t-transparent mx-auto mb-4"
-              />
+              <div className="w-12 h-12 rounded-full border-4 border-primary border-t-transparent mx-auto mb-4 animate-spin" />
               <p className="text-lg font-medium">Localisation en cours...</p>
               <p className="text-sm text-muted-foreground">Veuillez patienter</p>
             </div>
-          </motion.div>
+          </div>
         )}
       </div>
       
       {/* Bottom panel */}
-      <motion.div
-        {...(isMobile ? {} : { initial: { y: 100, opacity: 0 }, animate: { y: 0, opacity: 1 }, transition: { delay: 0.5 } })}
-        className="bg-background border-t border-border p-6 rounded-t-3xl -mt-6 relative z-10 shadow-elevated max-h-[70vh] overflow-auto"
-      >
+      <div className="bg-background border-t border-border p-6 rounded-t-3xl -mt-6 relative z-10 shadow-elevated max-h-[60vh] overflow-auto">
         {geoError && (
-          <p className="mb-4 text-sm text-destructive">
-            {geoError}
-          </p>
+          <p className="mb-4 text-sm text-destructive">{geoError}</p>
         )}
         {errorMessage && !geoError && (
-          <p className="mb-4 text-sm text-destructive">
-            {errorMessage}
-          </p>
+          <p className="mb-4 text-sm text-destructive">{errorMessage}</p>
         )}
+        
         {isGiver ? (
-          // Giver panel
           <div>
             {shareSuccess ? (
-              <motion.div
-                {...(isMobile ? {} : { initial: { scale: 0.9, opacity: 0 }, animate: { scale: 1, opacity: 1 } })}
-                className="text-center"
-              >
+              <div className="text-center">
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                   <Check className="w-8 h-8 text-primary" />
                 </div>
                 <h3 className="font-display text-xl font-bold mb-2">Votre repas est partagé !</h3>
                 <p className="text-muted-foreground mb-4">
-                  Quelqu'un proche de vous va bientôt le recevoir. Merci pour votre générosité ! 💚
+                  Quelqu'un proche de vous va bientôt le recevoir. Merci pour votre générosité !
                 </p>
                 <Button variant="soft" onClick={onBack}>
                   Retour à l'accueil
                 </Button>
-              </motion.div>
+              </div>
             ) : showMealForm ? (
-              // Meal description form
-              <motion.div
-                {...(isMobile ? {} : { initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 } })}
-              >
+              <div>
                 <h3 className="font-display text-xl font-bold mb-6">Décrivez votre repas</h3>
                 
-                {/* Meal description */}
                 <div className="mb-5">
                   <label className="block text-sm font-medium mb-2 text-foreground">
                     Quel repas partagez-vous ?
@@ -280,8 +232,8 @@ const MapView = ({ role, onBack }: MapViewProps) => {
                   <textarea
                     value={mealForm.description}
                     onChange={(e) => setMealForm(prev => ({ ...prev, description: e.target.value }))}
-                    placeholder="Ex: Pâtes carbonara, Curry de poulet, Sandwich jambon-beurre..."
-                    className="w-full h-24 px-4 py-3 rounded-xl border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
+                    placeholder="Ex: Pâtes carbonara, Curry de poulet..."
+                    className="w-full h-20 px-4 py-3 rounded-xl border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
                     maxLength={150}
                   />
                   <p className="text-xs text-muted-foreground mt-1 text-right">
@@ -289,7 +241,6 @@ const MapView = ({ role, onBack }: MapViewProps) => {
                   </p>
                 </div>
                 
-                {/* Temperature */}
                 <div className="mb-5">
                   <label className="block text-sm font-medium mb-2 text-foreground">
                     Température du repas
@@ -301,7 +252,7 @@ const MapView = ({ role, onBack }: MapViewProps) => {
                       className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 transition-all ${
                         mealForm.temperature === "hot"
                           ? "border-secondary bg-secondary/10 text-secondary"
-                          : "border-border bg-card text-muted-foreground hover:border-secondary/50"
+                          : "border-border bg-card text-muted-foreground"
                       }`}
                     >
                       <Flame className="w-5 h-5" />
@@ -313,7 +264,7 @@ const MapView = ({ role, onBack }: MapViewProps) => {
                       className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 transition-all ${
                         mealForm.temperature === "cold"
                           ? "border-primary bg-primary/10 text-primary"
-                          : "border-border bg-card text-muted-foreground hover:border-primary/50"
+                          : "border-border bg-card text-muted-foreground"
                       }`}
                     >
                       <Snowflake className="w-5 h-5" />
@@ -322,7 +273,6 @@ const MapView = ({ role, onBack }: MapViewProps) => {
                   </div>
                 </div>
                 
-                {/* Portions */}
                 <div className="mb-6">
                   <label className="block text-sm font-medium mb-2 text-foreground">
                     Nombre de portions
@@ -332,7 +282,7 @@ const MapView = ({ role, onBack }: MapViewProps) => {
                       type="button"
                       onClick={decrementPortions}
                       disabled={mealForm.portions <= 1}
-                      className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-foreground hover:bg-muted/80 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-foreground disabled:opacity-40"
                     >
                       <Minus className="w-5 h-5" />
                     </button>
@@ -346,14 +296,13 @@ const MapView = ({ role, onBack }: MapViewProps) => {
                       type="button"
                       onClick={incrementPortions}
                       disabled={mealForm.portions >= 10}
-                      className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-foreground hover:bg-muted/80 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-foreground disabled:opacity-40"
                     >
                       <Plus className="w-5 h-5" />
                     </button>
                   </div>
                 </div>
                 
-                {/* Submit button */}
                 <Button
                   variant="give"
                   size="xl"
@@ -361,10 +310,9 @@ const MapView = ({ role, onBack }: MapViewProps) => {
                   onClick={handleShare}
                   disabled={!canSubmit}
                 >
-                  <span className="text-xl">🤲</span>
                   Partager ce repas
                 </Button>
-              </motion.div>
+              </div>
             ) : (
               <>
                 <div className="flex items-start gap-4 mb-6">
@@ -392,43 +340,36 @@ const MapView = ({ role, onBack }: MapViewProps) => {
                       Partage en cours...
                     </>
                   ) : (
-                    <>
-                      <span className="text-xl">🤲</span>
-                      Partager mon repas
-                    </>
+                    "Partager mon repas"
                   )}
                 </Button>
               </>
             )}
           </div>
         ) : (
-          // Need panel
           <div>
             <h3 className="font-display text-lg font-bold mb-4">
-              {nearbyItems.length > 0 ? `${nearbyItems.length} repas disponibles à proximité` : "Recherche de repas..."}
+              {nearbyItems.length > 0 ? `${nearbyItems.length} repas disponibles` : "Recherche de repas..."}
             </h3>
             
-            <div className="space-y-3 max-h-48 overflow-auto">
-              {nearbyItems.map((item, index) => (
-                <motion.div
+            <div className="space-y-3 max-h-40 overflow-auto">
+              {nearbyItems.map((item) => (
+                <div
                   key={item.id}
-                  {...(isMobile ? {} : { initial: { x: -20, opacity: 0 }, animate: { x: 0, opacity: 1 }, transition: { delay: index * 0.1 } })}
-                  className="bg-card rounded-xl p-4 border border-border flex items-center gap-4 cursor-pointer hover:shadow-soft transition-all"
+                  className="bg-card rounded-xl p-4 border border-border flex items-center gap-4"
                 >
-                  <div className="w-12 h-12 rounded-xl bg-gradient-warm flex items-center justify-center flex-shrink-0">
-                    <span className="text-xl">{item.temperature === "hot" ? "🍲" : "🥪"}</span>
+                  <div className="w-10 h-10 rounded-xl bg-gradient-warm flex items-center justify-center flex-shrink-0">
+                    <span className="text-lg">{item.temperature === "hot" ? "🍲" : "🥪"}</span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-foreground truncate">{item.description}</p>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <p className="font-medium text-foreground truncate text-sm">{item.description}</p>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <span>À {item.distanceLabel ?? "proximité"}</span>
                       <span>•</span>
                       <span className="flex items-center gap-1">
                         {item.temperature === "hot" ? <Flame className="w-3 h-3" /> : <Snowflake className="w-3 h-3" />}
                         {item.temperature === "hot" ? "Chaud" : "Froid"}
                       </span>
-                      <span>•</span>
-                      <span>{item.portions} {item.portions === 1 ? "portion" : "portions"}</span>
                     </div>
                   </div>
                   <Button
@@ -438,19 +379,19 @@ const MapView = ({ role, onBack }: MapViewProps) => {
                   >
                     Y aller
                   </Button>
-                </motion.div>
+                </div>
               ))}
             </div>
             
-            {nearbyItems.length === 0 && hasLocation && (
-              <p className="text-center text-muted-foreground py-8">
-                Aucun repas disponible pour le moment. Revenez bientôt ! 🙏
+            {nearbyItems.length === 0 && hasLocation && !isLocating && (
+              <p className="text-center text-muted-foreground py-6">
+                Aucun repas disponible pour le moment.
               </p>
             )}
           </div>
         )}
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 };
 

@@ -1,30 +1,16 @@
-import { motion } from "framer-motion";
-
 const StorySection = () => {
   return (
     <section id="story" className="py-24 bg-card">
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-12"
-          >
+          <div className="text-center mb-12">
             <span className="text-6xl mb-6 block">💭</span>
             <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">
               L'histoire derrière <span className="text-gradient-nature">FeedMe</span>
             </h2>
-          </motion.div>
+          </div>
           
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="bg-background rounded-3xl p-8 md:p-12 shadow-soft border border-border/50"
-          >
+          <div className="bg-background rounded-3xl p-8 md:p-12 shadow-soft border border-border/50">
             <div className="prose prose-lg max-w-none">
               <p className="text-lg md:text-xl leading-relaxed text-muted-foreground mb-6">
                 Un soir, en sortant d'un restaurant asiatique, j'avais un plat chaud à emporter — 
@@ -53,7 +39,7 @@ const StorySection = () => {
                 <p className="text-sm text-muted-foreground">Fondateur de FeedMe</p>
               </div>
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>
