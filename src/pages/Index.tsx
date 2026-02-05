@@ -5,6 +5,7 @@ import StorySection from "@/components/StorySection";
 import HowItWorksSection from "@/components/HowItWorksSection";
 import FeaturesSection from "@/components/FeaturesSection";
 import CTASection from "@/components/CTASection";
+import PartnershipSection from "@/components/PartnershipSection";
 import ContactSection from "@/components/ContactSection";
 import Footer from "@/components/Footer";
 import RoleSelectionModal from "@/components/RoleSelectionModal";
@@ -64,6 +65,7 @@ const Index = () => {
         <HowItWorksSection />
         <FeaturesSection />
         <CTASection onStartClick={handleStartClick} />
+        <PartnershipSection />
         <ContactSection />
       </main>
       <Footer />
