@@ -33,7 +33,7 @@ const Footer = () => {
         
         <div className="mt-8 pt-6 border-t border-border text-center text-sm text-muted-foreground">
           <p>© 2026 FeedMe. Fait avec ❤️ pour une alimentation solidaire.</p>
-          <p className="mt-1">Développé par Léo Le Coguic</p>
+          <p className="mt-1">Développé par <a href="https://leolecoguic.fr" target="_blank" rel="noopener noreferrer" className="text-foreground hover:text-primary transition-colors">Léo Le Coguic</a></p>
         </div>
       </div>
     </footer>
