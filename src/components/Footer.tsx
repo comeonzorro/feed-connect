@@ -16,14 +16,14 @@ const Footer = () => {
             <a href="#story" className="text-muted-foreground hover:text-foreground transition-colors">
               À propos
             </a>
+            <a href="#how" className="text-muted-foreground hover:text-foreground transition-colors">
+              Comment ça marche
+            </a>
+            <a href="#partenaires" className="text-muted-foreground hover:text-foreground transition-colors">
+              Partenaires
+            </a>
             <a href="#contact" className="text-muted-foreground hover:text-foreground transition-colors">
               Contact
-            </a>
-            <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-              Confidentialité
-            </a>
-            <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-              Conditions
             </a>
           </nav>
         </div>
