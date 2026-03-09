@@ -1,10 +1,64 @@
 import express from "express";
 import cors from "cors";
+import crypto from "crypto";
 import { Redis } from "@upstash/redis";
 import rateLimit from "express-rate-limit";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// --- Chiffrement asymétrique des IP (LCEN) ---
+const IP_AUDIT_KEY = "feedme:ip_audit_log";
+const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
+let publicKey = null;
+
+if (process.env.FEEDME_PUBLIC_KEY) {
+  publicKey = process.env.FEEDME_PUBLIC_KEY.replace(/\\n/g, "\n");
+  console.log("Clé publique chargée — journalisation LCEN active");
+} else {
+  console.log("FEEDME_PUBLIC_KEY non configurée — journalisation LCEN inactive");
+}
+
+function getClientIp(req) {
+  return req.headers["x-forwarded-for"]?.split(",")[0]?.trim() || req.socket.remoteAddress || "unknown";
+}
+
+function encryptForAudit(plaintext) {
+  if (!publicKey) return null;
+  try {
+    const buffer = Buffer.from(plaintext, "utf-8");
+    const encrypted = crypto.publicEncrypt(
+      { key: publicKey, padding: crypto.constants.RSA_PKCS1_OAEP_PADDING, oaepHash: "sha256" },
+      buffer
+    );
+    return encrypted.toString("base64");
+  } catch (error) {
+    console.error("Erreur chiffrement IP:", error.message);
+    return null;
+  }
+}
+
+async function logIpForAudit(req, action, mealId) {
+  if (!redis || !publicKey) return;
+  try {
+    const ip = getClientIp(req);
+    const timestamp = new Date().toISOString();
+    const payload = JSON.stringify({ ip, timestamp, action, mealId });
+    const encrypted = encryptForAudit(payload);
+    if (!encrypted) return;
+
+    const logs = (await redis.get(IP_AUDIT_KEY)) || [];
+    logs.push({ encrypted, timestamp, action });
+
+    // Purger les entrées de plus d'un an (obligation LCEN = 1 an)
+    const cutoff = Date.now() - ONE_YEAR_MS;
+    const filtered = logs.filter((l) => new Date(l.timestamp).getTime() > cutoff);
+
+    await redis.set(IP_AUDIT_KEY, filtered);
+  } catch (error) {
+    console.error("Erreur log IP audit:", error.message);
+  }
+}
 
 // --- Redis ---
 let redis = null;
@@ -228,6 +282,8 @@ app.post("/api/meals", createMealLimiter, async (req, res) => {
     claimed: false,
   });
 
+  await logIpForAudit(req, "create_meal", meal.id);
+
   res.status(201).json(meal);
 });
 
@@ -246,6 +302,7 @@ app.delete("/api/meals/:id", async (req, res) => {
   await saveMealsToRedis();
 
   await markLogAsClaimed(meal.createdAt);
+  await logIpForAudit(req, "claim_meal", meal.id);
 
   res.json({
     success: true,

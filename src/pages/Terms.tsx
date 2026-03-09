@@ -120,8 +120,10 @@ const Terms = () => {
             </p>
             <ul className="list-disc pl-6 space-y-2 text-muted-foreground mt-4">
               <li>La responsabilit&eacute; incombe <strong className="text-foreground">au bienfaiteur ayant partag&eacute; le repas</strong>, au titre de l'article 1240 du Code civil (responsabilit&eacute; pour faute) ou de l'article 1242 (responsabilit&eacute; du fait des choses).</li>
-              <li>FeedMe &eacute;tant anonyme, la plateforme <strong className="text-foreground">ne dispose d'aucune donn&eacute;e permettant d'identifier</strong> les utilisateurs concern&eacute;s. Cette anonymisation est un choix de conception assum&eacute;, coh&eacute;rent avec la philosophie du service.</li>
-              <li>La victime est invit&eacute;e &agrave; consulter un m&eacute;decin et &agrave; d&eacute;poser plainte aupr&egrave;s des autorit&eacute;s comp&eacute;tentes si n&eacute;cessaire.</li>
+              <li>La victime est invit&eacute;e &agrave; consulter un m&eacute;decin et &agrave; d&eacute;poser plainte aupr&egrave;s des autorit&eacute;s comp&eacute;tentes.</li>
+              <li>Conform&eacute;ment &agrave; la LCEN (article 6-II), FeedMe conserve un <strong className="text-foreground">journal chiffr&eacute; des adresses IP</strong> associ&eacute;es aux actions de cr&eacute;ation et de r&eacute;cup&eacute;ration de repas. Ces donn&eacute;es sont chiffr&eacute;es par cl&eacute; asym&eacute;trique et <strong className="text-foreground">ne peuvent &ecirc;tre d&eacute;chiffr&eacute;es que sur r&eacute;quisition judiciaire</strong>.</li>
+              <li>Les autorit&eacute;s peuvent demander le d&eacute;chiffrement de ces donn&eacute;es pour identifier l'adresse IP concern&eacute;e, puis obtenir l'identit&eacute; de l'abonn&eacute; aupr&egrave;s du fournisseur d'acc&egrave;s Internet.</li>
+              <li>Les donn&eacute;es de connexion sont conserv&eacute;es <strong className="text-foreground">un an</strong> conform&eacute;ment aux obligations l&eacute;gales, puis automatiquement purg&eacute;es.</li>
             </ul>
           </section>
 

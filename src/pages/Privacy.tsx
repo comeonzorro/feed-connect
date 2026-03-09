@@ -122,6 +122,50 @@ const Privacy = () => {
           </section>
 
           <section>
+            <h2 className="font-display text-2xl font-bold mb-4">Journal de connexion (obligation LCEN)</h2>
+            <p className="text-muted-foreground leading-relaxed">
+              Conform&eacute;ment &agrave; la Loi pour la Confiance dans l'&Eacute;conomie Num&eacute;rique (LCEN, article 6-II),
+              FeedMe conserve un <strong className="text-foreground">journal technique chiffr&eacute;</strong> des adresses IP associ&eacute;es
+              aux actions de cr&eacute;ation et de r&eacute;cup&eacute;ration de repas.
+            </p>
+            <div className="bg-card rounded-2xl p-6 border border-border/50 mt-4 space-y-3">
+              <div className="flex items-start gap-3">
+                <span className="text-xl">&#x1F512;</span>
+                <p className="text-muted-foreground">
+                  Les adresses IP sont <strong className="text-foreground">chiffr&eacute;es par cl&eacute; asym&eacute;trique (RSA-2048)</strong> avant
+                  stockage. Le serveur ne peut pas les d&eacute;chiffrer.
+                </p>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="text-xl">&#x1F5DD;</span>
+                <p className="text-muted-foreground">
+                  La cl&eacute; de d&eacute;chiffrement est conserv&eacute;e <strong className="text-foreground">hors ligne</strong> et
+                  n'est utilis&eacute;e que sur r&eacute;quisition judiciaire.
+                </p>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="text-xl">&#x1F5D1;</span>
+                <p className="text-muted-foreground">
+                  Les entr&eacute;es sont <strong className="text-foreground">automatiquement purg&eacute;es apr&egrave;s 1 an</strong> (dur&eacute;e
+                  l&eacute;gale de conservation).
+                </p>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="text-xl">&#x1F6AB;</span>
+                <p className="text-muted-foreground">
+                  Aucun employ&eacute;, d&eacute;veloppeur ou administrateur ne peut acc&eacute;der aux IP en clair.
+                  Seule une autorit&eacute; judiciaire peut en demander le d&eacute;chiffrement.
+                </p>
+              </div>
+            </div>
+            <p className="text-muted-foreground leading-relaxed mt-4">
+              Ce dispositif garantit &agrave; la fois la <strong className="text-foreground">protection de votre anonymat</strong> au
+              quotidien et la capacit&eacute; des autorit&eacute;s &agrave; intervenir en cas d'infraction grave (intoxication
+              volontaire, mise en danger d'autrui).
+            </p>
+          </section>
+
+          <section>
             <h2 className="font-display text-2xl font-bold mb-4">H&eacute;bergement</h2>
             <ul className="list-none space-y-2 text-muted-foreground">
               <li><strong className="text-foreground">Frontend :</strong> Vercel Inc. (San Francisco, CA, USA)</li>
