@@ -76,6 +76,8 @@ app.use(express.json());
 
 // --- CORS restreint à la prod + localhost en dev ---
 const ALLOWED_ORIGINS = [
+  "https://feedme.social",
+  "https://www.feedme.social",
   "https://feedme.theoffnote.pro",
   "https://feed-connect-kappa.vercel.app",
 ];

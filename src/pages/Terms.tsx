@@ -21,7 +21,7 @@ const Terms = () => {
           <section>
             <h2 className="font-display text-2xl font-bold mb-4">1. Pr&eacute;sentation du service</h2>
             <p className="text-muted-foreground leading-relaxed">
-              FeedMe (accessible &agrave; l'adresse <strong className="text-foreground">feedme.theoffnote.pro</strong>) est une
+              FeedMe (accessible &agrave; l'adresse <strong className="text-foreground">feedme.social</strong>) est une
               application web gratuite qui met en relation des personnes souhaitant partager un repas
               en trop avec des personnes qui en ont besoin. Le service est &eacute;dit&eacute; par{" "}
               <strong className="text-foreground">The Off Note</strong>, repr&eacute;sent&eacute;e par L&eacute;o Le Coguic.
@@ -193,7 +193,7 @@ const Terms = () => {
               Pour toute question relative aux pr&eacute;sentes conditions :
             </p>
             <ul className="list-none space-y-1 text-muted-foreground mt-4">
-              <li><strong className="text-foreground">Email :</strong> <a href="mailto:leo@theoffnote.pro" className="text-primary hover:underline">leo@theoffnote.pro</a></li>
+              <li><strong className="text-foreground">Email :</strong> <a href="mailto:leo@feedme.social" className="text-primary hover:underline">leo@feedme.social</a></li>
               <li><strong className="text-foreground">T&eacute;l&eacute;phone :</strong> +33 6 83 36 12 25</li>
             </ul>
           </section>

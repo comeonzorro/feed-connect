@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://feedme.theoffnote.pro/sitemap.xml
+Sitemap: https://feedme.social/sitemap.xml

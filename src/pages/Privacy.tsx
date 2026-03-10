@@ -25,9 +25,9 @@ const Privacy = () => {
             </p>
             <ul className="list-none space-y-1 text-muted-foreground mt-4">
               <li><strong className="text-foreground">Responsable :</strong> L&eacute;o Le Coguic</li>
-              <li><strong className="text-foreground">Email :</strong> leo@theoffnote.pro</li>
+              <li><strong className="text-foreground">Email :</strong> leo@feedme.social</li>
               <li><strong className="text-foreground">T&eacute;l&eacute;phone :</strong> +33 6 83 36 12 25</li>
-              <li><strong className="text-foreground">Site &eacute;diteur :</strong> theoffnote.pro</li>
+              <li><strong className="text-foreground">Site &eacute;diteur :</strong> feedme.social</li>
             </ul>
           </section>
 
@@ -187,7 +187,7 @@ const Privacy = () => {
               modifier ou supprimer.
             </p>
             <p className="text-muted-foreground leading-relaxed mt-4">
-              Si vous avez la moindre question, contactez-nous : <a href="mailto:leo@theoffnote.pro" className="text-primary hover:underline">leo@theoffnote.pro</a>
+              Si vous avez la moindre question, contactez-nous : <a href="mailto:leo@feedme.social" className="text-primary hover:underline">leo@feedme.social</a>
             </p>
           </section>
 
