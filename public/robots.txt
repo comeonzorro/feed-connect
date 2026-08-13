@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://feedme.social/sitemap.xml
+Sitemap: https://www.feedme.social/sitemap.xml
