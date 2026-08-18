@@ -1,6 +1,14 @@
 import { ArrowLeft } from "lucide-react";
+import { usePageMeta } from "@/lib/page-meta";
 
 const Terms = () => {
+  usePageMeta({
+    title: "Conditions générales — FeedMe",
+    description:
+      "Conditions générales d'utilisation de FeedMe, application solidaire de partage de repas anti-gaspillage alimentaire.",
+    path: "/conditions",
+  });
+
   return (
     <div className="min-h-screen bg-background">
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/50">

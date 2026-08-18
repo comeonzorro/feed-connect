@@ -1,6 +1,14 @@
 import { ArrowLeft } from "lucide-react";
+import { usePageMeta } from "@/lib/page-meta";
 
 const Privacy = () => {
+  usePageMeta({
+    title: "Politique de confidentialité — FeedMe",
+    description:
+      "Politique de confidentialité de FeedMe : données collectées, finalités, durée de conservation et vos droits RGPD.",
+    path: "/confidentialite",
+  });
+
   return (
     <div className="min-h-screen bg-background">
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/50">

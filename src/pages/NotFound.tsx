@@ -1,12 +1,15 @@
 import { useLocation } from "react-router-dom";
-import { useEffect } from "react";
+import { usePageMeta } from "@/lib/page-meta";
 
 const NotFound = () => {
   const location = useLocation();
 
-  useEffect(() => {
-    console.error("404 Error: User attempted to access non-existent route:", location.pathname);
-  }, [location.pathname]);
+  usePageMeta({
+    title: "Page introuvable — FeedMe",
+    description: "La page demandée n'existe pas sur FeedMe.",
+    path: location.pathname,
+    noindex: true,
+  });
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted">

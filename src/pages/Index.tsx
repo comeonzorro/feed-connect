@@ -10,6 +10,7 @@ import PartnershipSection from "@/components/PartnershipSection";
 import ContactSection from "@/components/ContactSection";
 import Footer from "@/components/Footer";
 import RoleSelectionModal from "@/components/RoleSelectionModal";
+import { usePageMeta } from "@/lib/page-meta";
 
 // Lazy load MapView pour réduire le bundle initial
 const MapView = lazy(() => import("@/components/MapView"));
@@ -25,6 +26,13 @@ const MapLoadingFallback = () => (
 );
 
 const Index = () => {
+  usePageMeta({
+    title: "FeedMe - Partagez un repas, changez une journée",
+    description:
+      "FeedMe connecte ceux qui ont trop avec ceux qui ont besoin. App 100% anonyme et gratuite pour partager des repas. Anti-gaspillage alimentaire solidaire.",
+    path: "/",
+  });
+
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [selectedRole, setSelectedRole] = useState<"need" | "give" | null>(null);
   const [showMap, setShowMap] = useState(false);
