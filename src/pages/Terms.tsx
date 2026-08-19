@@ -22,15 +22,15 @@ const Terms = () => {
 
       <main className="container mx-auto px-4 pt-24 pb-16 max-w-3xl">
         <h1 className="font-display text-3xl md:text-4xl font-bold mb-2">Conditions g&eacute;n&eacute;rales d'utilisation</h1>
-        <p className="text-muted-foreground mb-10">Derni&egrave;re mise &agrave; jour : 9 mars 2026</p>
+        <p className="text-muted-foreground mb-10">Derni&egrave;re mise &agrave; jour : 19 ao&ucirc;t 2026</p>
 
         <div className="prose prose-lg max-w-none space-y-8 text-foreground">
 
           <section>
             <h2 className="font-display text-2xl font-bold mb-4">1. Pr&eacute;sentation du service</h2>
             <p className="text-muted-foreground leading-relaxed">
-              FeedMe (accessible &agrave; l'adresse <strong className="text-foreground">feedme.social</strong>) est une
-              application web gratuite qui met en relation des personnes souhaitant partager un repas
+              FeedMe (accessible via <strong className="text-foreground">feedme.social</strong> et l&apos;application iOS FeedMe) est une
+              application gratuite qui met en relation des personnes souhaitant partager un repas
               en trop avec des personnes qui en ont besoin. Le service est &eacute;dit&eacute; par{" "}
               <strong className="text-foreground">The Off Note</strong>, repr&eacute;sent&eacute;e par L&eacute;o Le Coguic.
             </p>

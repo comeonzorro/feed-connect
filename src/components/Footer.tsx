@@ -22,6 +22,9 @@ const Footer = () => {
             <a href="#contact" className="text-muted-foreground hover:text-foreground transition-colors">
               Contact
             </a>
+            <a href="/support" className="text-muted-foreground hover:text-foreground transition-colors">
+              Assistance
+            </a>
             <a href="/confidentialite" className="text-muted-foreground hover:text-foreground transition-colors">
               Confidentialité
             </a>

@@ -22,14 +22,15 @@ const Privacy = () => {
 
       <main className="container mx-auto px-4 pt-24 pb-16 max-w-3xl">
         <h1 className="font-display text-3xl md:text-4xl font-bold mb-2">Politique de confidentialit&eacute;</h1>
-        <p className="text-muted-foreground mb-10">Derni&egrave;re mise &agrave; jour : 9 mars 2026</p>
+        <p className="text-muted-foreground mb-10">Derni&egrave;re mise &agrave; jour : 19 ao&ucirc;t 2026</p>
 
         <div className="prose prose-lg max-w-none space-y-8 text-foreground">
           <section>
             <h2 className="font-display text-2xl font-bold mb-4">&Eacute;diteur du service</h2>
             <p className="text-muted-foreground leading-relaxed">
               FeedMe est un service &eacute;dit&eacute; par <strong className="text-foreground">The Off Note</strong>, studio cr&eacute;atif
-              bas&eacute; &agrave; Paris et Saint-Malo.
+              bas&eacute; &agrave; Paris et Saint-Malo. Il est accessible via le site <strong className="text-foreground">feedme.social</strong> et
+              l&apos;application iOS <strong className="text-foreground">FeedMe</strong> (App Store).
             </p>
             <ul className="list-none space-y-1 text-muted-foreground mt-4">
               <li><strong className="text-foreground">Responsable :</strong> L&eacute;o Le Coguic</li>
@@ -72,11 +73,11 @@ const Privacy = () => {
               Voici comment cela fonctionne :
             </p>
             <ul className="list-disc pl-6 space-y-2 text-muted-foreground mt-4">
-              <li>La localisation est demand&eacute;e <strong className="text-foreground">uniquement apr&egrave;s votre accord explicite</strong> (permission du navigateur).</li>
+              <li>La localisation est demand&eacute;e <strong className="text-foreground">uniquement apr&egrave;s votre accord explicite</strong> (permission iOS ou du navigateur).</li>
               <li>Les coordonn&eacute;es GPS sont transmises au serveur <strong className="text-foreground">sans aucun identifiant</strong> associ&eacute;.</li>
               <li>Les donn&eacute;es de localisation sont <strong className="text-foreground">automatiquement supprim&eacute;es apr&egrave;s 4 heures</strong> maximum.</li>
               <li>Les statistiques anonymes (nombre de repas partag&eacute;s) ne contiennent <strong className="text-foreground">aucune localisation</strong>.</li>
-              <li>Vous pouvez r&eacute;voquer l'acc&egrave;s &agrave; la localisation &agrave; tout moment via les param&egrave;tres de votre navigateur.</li>
+              <li>Vous pouvez r&eacute;voquer l'acc&egrave;s &agrave; la localisation &agrave; tout moment via les R&eacute;glages iOS ou les param&egrave;tres de votre navigateur.</li>
             </ul>
           </section>
 
