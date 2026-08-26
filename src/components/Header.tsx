@@ -1,13 +1,22 @@
 import FeedMeLogo from "./FeedMeLogo";
 import { Button } from "@/components/ui/button";
+import { useAppStoreBanner } from "@/context/AppStoreBannerContext";
+import { cn } from "@/lib/utils";
 
 interface HeaderProps {
   onStartClick?: () => void;
 }
 
 const Header = ({ onStartClick }: HeaderProps) => {
+  const { headerOffsetClass } = useAppStoreBanner();
+
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/50">
+    <header
+      className={cn(
+        "fixed left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/50 transition-[top] duration-300",
+        headerOffsetClass
+      )}
+    >
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <FeedMeLogo size="sm" />
         

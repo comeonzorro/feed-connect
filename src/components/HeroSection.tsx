@@ -1,6 +1,9 @@
 import { Button } from "@/components/ui/button";
+import AppStoreBadge from "@/components/AppStoreBadge";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { useReducedMotion } from "@/hooks/use-mobile";
+import { useAppStoreBanner } from "@/context/AppStoreBannerContext";
+import { cn } from "@/lib/utils";
 
 interface HeroSectionProps {
   onStartClick: () => void;
@@ -8,9 +11,15 @@ interface HeroSectionProps {
 
 const HeroSection = ({ onStartClick }: HeroSectionProps) => {
   const reduceMotion = useReducedMotion();
+  const { isVisible: bannerVisible } = useAppStoreBanner();
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
+    <section
+      className={cn(
+        "relative min-h-screen flex items-center justify-center overflow-hidden transition-[padding] duration-300",
+        bannerVisible ? "pt-[6.5rem] sm:pt-[7rem]" : "pt-16"
+      )}
+    >
       {/* Background decorations - pas de blur sur mobile */}
       <div className="absolute inset-0 bg-gradient-hero" />
       <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl hidden md:block" />
@@ -53,7 +62,7 @@ const HeroSection = ({ onStartClick }: HeroSectionProps) => {
           </p>
           
           {/* CTA buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-up" style={{ animationDelay: "0.2s" }}>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-up" style={{ animationDelay: "0.2s" }}>
             <Button variant="hero" size="xl" onClick={onStartClick} className="group">
               Commencer maintenant
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -63,6 +72,11 @@ const HeroSection = ({ onStartClick }: HeroSectionProps) => {
                 Comment ça marche ?
               </a>
             </Button>
+          </div>
+
+          <div className="mt-6 flex flex-col items-center gap-2 animate-fade-up" style={{ animationDelay: "0.3s" }}>
+            <p className="text-sm text-muted-foreground">Ou téléchargez l&apos;app iOS — gratuite</p>
+            <AppStoreBadge size="lg" />
           </div>
           
           {/* Trust indicators */}

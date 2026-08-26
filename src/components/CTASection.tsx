@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import AppStoreBadge from "@/components/AppStoreBadge";
 import { ArrowRight } from "lucide-react";
 
 interface CTASectionProps {
@@ -23,15 +24,18 @@ const CTASection = ({ onStartClick }: CTASectionProps) => {
           <p className="text-lg text-primary-foreground/80 mb-8 max-w-xl mx-auto">
             Rejoignez une communauté qui croit que chaque repas compte.
           </p>
-          <Button 
-            variant="heroSecondary" 
-            size="xl" 
-            onClick={onStartClick}
-            className="group"
-          >
-            Commencer maintenant
-            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <Button 
+              variant="heroSecondary" 
+              size="xl" 
+              onClick={onStartClick}
+              className="group"
+            >
+              Commencer maintenant
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </Button>
+            <AppStoreBadge size="md" className="bg-white text-foreground" />
+          </div>
         </div>
       </div>
     </section>

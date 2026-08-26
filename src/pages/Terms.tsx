@@ -1,5 +1,7 @@
 import { ArrowLeft } from "lucide-react";
 import { usePageMeta } from "@/lib/page-meta";
+import { useAppStoreBanner } from "@/context/AppStoreBannerContext";
+import { cn } from "@/lib/utils";
 
 const Terms = () => {
   usePageMeta({
@@ -9,9 +11,16 @@ const Terms = () => {
     path: "/conditions",
   });
 
+  const { headerOffsetClass, mainPaddingClass } = useAppStoreBanner();
+
   return (
     <div className="min-h-screen bg-background">
-      <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/50">
+      <header
+        className={cn(
+          "fixed left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/50 transition-[top] duration-300",
+          headerOffsetClass
+        )}
+      >
         <div className="container mx-auto px-4 h-16 flex items-center">
           <a href="/" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="w-5 h-5" />
@@ -20,7 +29,7 @@ const Terms = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 pt-24 pb-16 max-w-3xl">
+      <main className={cn("container mx-auto px-4 pb-16 max-w-3xl", mainPaddingClass)}>
         <h1 className="font-display text-3xl md:text-4xl font-bold mb-2">Conditions g&eacute;n&eacute;rales d'utilisation</h1>
         <p className="text-muted-foreground mb-10">Derni&egrave;re mise &agrave; jour : 19 ao&ucirc;t 2026</p>
 

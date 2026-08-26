@@ -1,15 +1,17 @@
 import FeedMeLogo from "./FeedMeLogo";
+import AppStoreBadge from "./AppStoreBadge";
 
 const Footer = () => {
   return (
     <footer className="bg-card border-t border-border py-12">
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex flex-col items-center md:items-start gap-2">
+          <div className="flex flex-col items-center md:items-start gap-3">
             <FeedMeLogo size="sm" />
             <p className="text-sm text-muted-foreground">
               Partagez, Nourrissez, Connectez
             </p>
+            <AppStoreBadge size="sm" />
           </div>
           
           <nav className="flex flex-wrap justify-center gap-6 text-sm">
